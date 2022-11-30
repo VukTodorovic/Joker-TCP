@@ -73,9 +73,9 @@ int main(int argc , char *argv[])
     c = sizeof(struct sockaddr_in);
 
     while(1){
-        if(trenutniThread == 2)
-        {
-            break;
+        if(trenutniThread > 2)
+        {   
+            //break;
         }
         //accept connection from an incoming client
         client_sock = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&c);
@@ -88,16 +88,18 @@ int main(int argc , char *argv[])
         printf("Connection accepted with client %d\n", client_sock);
 
         pthread_t t = (trenutniThread == 1) ? t1 : t2;
+
+        if(trenutniThread==2){ // Ako su se oba konektovala
+            //generate joker nums
+            genJoker(jokerNums);
+            printf("Joker brojevi: ");
+            printJoker(jokerNums);
+        }
+        
         pthread_create(&t, NULL, serveClient, (void*) client_sock);
-        pthread_join(&t);
+        pthread_join(&t, NULL);
+        trenutniThread++;
     }
-
-    //generate joker nums
-    genJoker(jokerNums);
-    printf("Joker brojevi: ");
-    printJoker(jokerNums);
-
-
 
     return 0;
 }
@@ -126,6 +128,8 @@ void* serveClient(void* client_sock){
     {
         perror("recv failed");
     }
+
+    return 0;
 }
 
 void genJoker(int* niz){

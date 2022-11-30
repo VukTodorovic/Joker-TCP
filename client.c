@@ -56,7 +56,7 @@ int main(int argc , char *argv[])
 
     puts("Connected\n");
 
-    while(!(strncmp(message, quit_message, 6)==0)){
+    while(!(strcmp(message, quit_message)==0)){
         // Slanje
 
         scanf("%s", message); // Citamo poruku sa konzole
@@ -67,14 +67,15 @@ int main(int argc , char *argv[])
             puts("Send failed");
             return 1;
         }
+        
 
         // Primanje
 
-        read_size = recv(sock , server_message , DEFAULT_BUFLEN , 0)
+        // read_size = recv(sock , server_message , DEFAULT_BUFLEN , 0);
 
-        fflush(stdout);
-        server_message[read_size] = '\0';
-        printf("Server %d: %s\n", sock, server_message);
+        // fflush(stdout);
+        // server_message[read_size] = '\0';
+        // printf("Server %d: %s\n", sock, server_message);
         
     }
 
