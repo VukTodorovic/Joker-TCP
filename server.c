@@ -73,9 +73,15 @@ int main(int argc , char *argv[])
     c = sizeof(struct sockaddr_in);
 
     while(1){
-        if(trenutniThread > 2)
+        printf("# TRENUTNI THREAD: %d #\n", trenutniThread);
+        if(trenutniThread == 3)
         {   
-            //break;
+            //generate joker nums
+            fflush(stdout);
+            genJoker(jokerNums);
+            printf("Joker brojevi: ");
+            printJoker(jokerNums);
+            break;
         }
         //accept connection from an incoming client
         client_sock = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&c);
@@ -85,21 +91,30 @@ int main(int argc , char *argv[])
             return 1;
         }
         fflush(stdout);
-        printf("Connection accepted with client %d\n", client_sock);
+        printf("Connection accepted with client %d\n", client_sock); // client socket
+        printf("Client port: %d\n", client.sin_port); // client port
+        char ip_addr[20];
+        inet_ntop(AF_INET, &(client.sin_addr.s_addr), ip_addr, c);
+        /**
+        *   const char *inet_ntop(int af, const void *restrict src, char *restrict dst, socklen_t size);
+        *   AF_INET - it is an IPv4 adress
+        *   client.sin_addr.s_addr - IPv4 adress in bytes (unsigned int32)
+        *   ip_addr - destination / return value for "stringyfied" version of ip adress
+        *   c - socklen (it should represent length of buffer);
+        **/
+        printf("Client addr: %s\n", ip_addr); // client ip address
+        fflush(stdout);
 
         pthread_t t = (trenutniThread == 1) ? t1 : t2;
-
-        if(trenutniThread==2){ // Ako su se oba konektovala
-            //generate joker nums
-            genJoker(jokerNums);
-            printf("Joker brojevi: ");
-            printJoker(jokerNums);
-        }
         
         pthread_create(&t, NULL, serveClient, (void*) client_sock);
-        pthread_join(&t, NULL);
+        //pthread_join(t, NULL);  // doesn't work with join
         trenutniThread++;
     }
+
+    puts("# MAIN DOSAO DO RETURNA #");
+    getchar();
+    getchar();
 
     return 0;
 }
@@ -121,26 +136,24 @@ void* serveClient(void* client_sock){
 
     if(read_size == 0)
     {
-        puts("Client disconnected");
+        printf("Client %d disconnected\n", clientSocket);
         fflush(stdout);
     }
     else if(read_size == -1)
     {
         perror("recv failed");
     }
-
-    return 0;
 }
 
 void genJoker(int* niz){
     //test
-    for(int i=1; i<5; i++) {
-        niz[i] = i;
+    for(int i=0; i<5; i++) {
+        niz[i] = i+1;
     }
 }
 
 void printJoker(int* niz) {
-    for(int i=1; i<5; i++) {
+    for(int i=0; i<5; i++) {
         printf("%d", niz[i]);
     }
     printf("\n");
