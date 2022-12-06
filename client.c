@@ -26,6 +26,11 @@
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT   27015
 
+
+void generateRandom(int*);
+void printNums(int*);
+
+
 int main(int argc , char *argv[])
 {
     int sock;
@@ -34,12 +39,15 @@ int main(int argc , char *argv[])
     char quit_message[10] = "quit";
     char server_message[DEFAULT_BUFLEN];
     int read_size;
+    int numbers[5];
 
     //Create socket
     sock = socket(AF_INET , SOCK_STREAM , 0);
     if (sock == -1)
     {
         printf("Could not create socket");
+        close(sock);
+        return -1;
     }
     puts("Socket created");
 
@@ -51,36 +59,97 @@ int main(int argc , char *argv[])
     if (connect(sock , (struct sockaddr *)&server , sizeof(server)) < 0)
     {
         perror("connect failed. Error");
+        close(sock);
         return 1;
     }
 
     puts("Connected\n");
 
-    while(!(strcmp(message, quit_message)==0)){
-        // Slanje
+    printf("------------------------------------------------\n");
 
-        scanf("%s", message); // Citamo poruku sa konzole
-        fflush(stdin);
+    // Start game
+    read_size = recv(sock , server_message , DEFAULT_BUFLEN , 0);
+    server_message[read_size] = '\0';
+    printf("Server: %s\n", server_message);
 
-        if( send(sock , message , strlen(message), 0) < 0)
-        {
-            puts("Send failed");
-            return 1;
-        }
-        
-
-        // Primanje
-
-        // read_size = recv(sock , server_message , DEFAULT_BUFLEN , 0);
-
-        // fflush(stdout);
-        // server_message[read_size] = '\0';
-        // printf("Server %d: %s\n", sock, server_message);
-        
+    if(strcmp(server_message, "Start game") != 0){
+        puts("Game didn't start because of an error");
+        close(sock);
+        return 1;
     }
+
+    // Play option
+    int play_option = 0;
+    printf("Choose play option: \n");
+    printf("1) Input joker numbers\n");
+    printf("2) Generate random\n");
+    scanf("%d", &play_option);
+
+    switch (play_option)
+    {
+    case 1:
+        printf("Input 5 numbers separated by space:\n");
+        scanf("%d %d %d %d %d", numbers, numbers+1, numbers+2, numbers+3, numbers+4);
+        break;
+    case 2:
+        generateRandom(numbers);
+        break;
+    default:
+        puts("Wrong input");
+        close(sock);
+        return 1;
+    }
+
+    printf("Choosen numbers to play: ");
+    printNums(numbers);
+
+    // Sending numbers to server
+
+    // Server informs the client if he won the lottery
+
+    
+
+
+
+    // Slanje
+    // scanf("%s", message); // Citamo poruku sa konzole
+    // fflush(stdin);
+
+    // if( send(sock , message , strlen(message), 0) < 0)
+    // {
+    //     puts("Send failed");
+    //     return 1;
+    // }
+    
+
+    // Primanje
+
+    // read_size = recv(sock , server_message , DEFAULT_BUFLEN , 0);
+
+    // fflush(stdout);
+    // server_message[read_size] = '\0';
+    // printf("Server %d: %s\n", sock, server_message);
+        
 
     close(sock);
 
     return 0;
 }
+
+// Generates 5 random numbers 0-9
+void generateRandom(int* niz){
+    //test
+    for(int i=0; i<5; i++){
+        niz[i] = i+1;
+    }
+}
+
+// Prints array of numbers
+void printNums(int* niz){
+    for(int i=0; i<5; i++){
+        printf("[%d]", niz[i]);
+    }
+    printf("\n");
+}
+
 

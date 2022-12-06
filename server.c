@@ -38,7 +38,6 @@ int main(int argc , char *argv[])
 {
     int socket_desc , client_sock , c;
     struct sockaddr_in server , client;
-    //char client_message[DEFAULT_BUFLEN];
     pthread_t t1, t2;
     int trenutniThread = 1;
     int jokerNums[5];
@@ -72,8 +71,9 @@ int main(int argc , char *argv[])
     puts("Waiting for incoming connections...");
     c = sizeof(struct sockaddr_in);
 
+    // Connecting with 2 clients
     while(1){
-        printf("# TRENUTNI THREAD: %d #\n", trenutniThread);
+        //printf("# TRENUTNI THREAD: %d #\n", trenutniThread);
         if(trenutniThread == 3)
         {   
             //generate joker nums
@@ -112,9 +112,18 @@ int main(int argc , char *argv[])
         trenutniThread++;
     }
 
+    
+
+
+
+
+
+
     puts("# MAIN DOSAO DO RETURNA #");
     getchar();
     getchar();
+    close(socket_desc);
+    puts("socket closed");
 
     return 0;
 }
@@ -124,37 +133,46 @@ int main(int argc , char *argv[])
 void* serveClient(void* client_sock){
     int clientSocket = (int) client_sock;
     char client_message[DEFAULT_BUFLEN];
+    char message_to_send[DEFAULT_BUFLEN];
     int read_size;
 
-    //Receive a message from client
-    while( (read_size = recv(clientSocket , client_message , DEFAULT_BUFLEN , 0)) > 0 )
+    // Server sends "Start game" to the client
+    strcpy(message_to_send, "Start game");
+    if( send(clientSocket , message_to_send , strlen(message_to_send), 0) < 0)
     {
-        fflush(stdout);
-        client_message[read_size] = '\0';
-        printf("Client %d: %s\n", clientSocket, client_message);
+        puts("Send failed");
+        return 1;
     }
 
-    if(read_size == 0)
-    {
-        printf("Client %d disconnected\n", clientSocket);
-        fflush(stdout);
-    }
-    else if(read_size == -1)
-    {
-        perror("recv failed");
-    }
+    //Receive a message from client
+    // while( (read_size = recv(clientSocket , client_message , DEFAULT_BUFLEN , 0)) > 0 )
+    // {
+    //     fflush(stdout);
+    //     client_message[read_size] = '\0';
+    //     printf("Client %d: %s\n", clientSocket, client_message);
+    // }
+
+    // if(read_size == 0)
+    // {
+    //     printf("Client %d disconnected\n", clientSocket);
+    //     fflush(stdout);
+    // }
+    // else if(read_size == -1)
+    // {
+    //     perror("recv failed");
+    // }
 }
 
 void genJoker(int* niz){
     //test
-    for(int i=0; i<5; i++) {
-        niz[i] = i+1;
-    }
+    // for(int i=0; i<5; i++) {
+    //     niz[i] = i+1;
+    // }
 }
 
 void printJoker(int* niz) {
     for(int i=0; i<5; i++) {
-        printf("%d", niz[i]);
+        printf("[%d]", niz[i]);
     }
     printf("\n");
 }
