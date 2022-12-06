@@ -1,17 +1,7 @@
 /* 
     ********************************************************************
-    Odsek:          Elektrotehnika i racunarstvo
-    Departman:      Racunarstvo i automatika
-    Katedra:        Racunarska tehnika i racunarske komunikacije (RT-RK)
-    Predmet:        Osnovi Racunarskih Mreza 1
-    Godina studija: Treca (III)
-    Skolska godina: 2021/22
-    Semestar:       Zimski (V)
-    
-    Ime fajla:      client.c
-    Opis:           TCP/IP klijent
-    
-    Platforma:      Raspberry Pi 2 - Model B
+    Description:    TCP/IP client
+    Platform:       Raspberry Pi 2 - Model B
     OS:             Raspbian
     ********************************************************************
 */
@@ -45,11 +35,11 @@ int main(int argc , char *argv[])
     sock = socket(AF_INET , SOCK_STREAM , 0);
     if (sock == -1)
     {
-        printf("Could not create socket");
+        printf("[!]Could not create socket");
         close(sock);
         return -1;
     }
-    puts("Socket created");
+    puts("[*]Socket created");
 
     server.sin_addr.s_addr = inet_addr("127.0.0.1");
     server.sin_family = AF_INET;
@@ -58,29 +48,29 @@ int main(int argc , char *argv[])
     //Connect to remote server
     if (connect(sock , (struct sockaddr *)&server , sizeof(server)) < 0)
     {
-        perror("connect failed. Error");
+        perror("[!]Connect failed. Error");
         close(sock);
         return 1;
     }
 
-    puts("Connected\n");
+    puts("[*]Connected");
 
     printf("------------------------------------------------\n");
 
     // Start game
     read_size = recv(sock , server_message , DEFAULT_BUFLEN , 0);
     server_message[read_size] = '\0';
-    printf("Server: %s\n", server_message);
+    printf("[*]%s\n", server_message);
 
     if(strcmp(server_message, "Start game") != 0){
-        puts("Game didn't start because of an error");
+        puts("[!]Game didn't start because of an error");
         close(sock);
         return 1;
     }
 
     // Play option
     int play_option = 0;
-    printf("Choose play option: \n");
+    printf("[*]Choose play option: \n");
     printf("1) Input joker numbers\n");
     printf("2) Generate random\n");
     scanf("%d", &play_option);
@@ -88,22 +78,23 @@ int main(int argc , char *argv[])
     switch (play_option)
     {
     case 1:
-        printf("Input 5 numbers separated by space:\n");
+        printf("[*]Input 5 numbers separated by space:\n");
         scanf("%d %d %d %d %d", numbers, numbers+1, numbers+2, numbers+3, numbers+4);
         break;
     case 2:
         generateRandom(numbers);
         break;
     default:
-        puts("Wrong input");
+        puts("[!]Wrong input");
         close(sock);
         return 1;
     }
 
-    printf("Choosen numbers to play: ");
+    printf("[*]Choosen numbers to play: ");
     printNums(numbers);
 
     // Sending numbers to server
+    
 
     // Server informs the client if he won the lottery
 

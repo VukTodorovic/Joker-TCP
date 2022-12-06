@@ -1,17 +1,7 @@
 /* 
     ********************************************************************
-    Odsek:          Elektrotehnika i racunarstvo
-    Departman:      Racunarstvo i automatika
-    Katedra:        Racunarska tehnika i racunarske komunikacije (RT-RK)
-    Predmet:        Osnovi Racunarskih Mreza 1
-    Godina studija: Treca (III)
-    Skolska godina: 2021/22
-    Semestar:       Zimski (V)
-    
-    Ime fajla:      server.c
-    Opis:           TCP/IP server
-    
-    Platforma:      Raspberry Pi 2 - Model B
+    Description:    TCP/IP server
+    Platform:       Raspberry Pi 2 - Model B
     OS:             Raspbian
     ********************************************************************
 */
@@ -22,16 +12,14 @@
 #include<arpa/inet.h> //inet_addr
 #include<unistd.h>    //write
 #include<pthread.h>
+#include<time.h>
 
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT   27015
 
 
-
-
 void* serveClient(void*);
 void genJoker(int*);
-void printJoker(int*);
 
 
 int main(int argc , char *argv[])
@@ -72,17 +60,7 @@ int main(int argc , char *argv[])
     c = sizeof(struct sockaddr_in);
 
     // Connecting with 2 clients
-    while(1){
-        //printf("# TRENUTNI THREAD: %d #\n", trenutniThread);
-        if(trenutniThread == 3)
-        {   
-            //generate joker nums
-            fflush(stdout);
-            genJoker(jokerNums);
-            printf("Joker brojevi: ");
-            printJoker(jokerNums);
-            break;
-        }
+    while(trenutniThread < 3){
         //accept connection from an incoming client
         client_sock = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&c);
         if (client_sock < 0)
@@ -91,7 +69,7 @@ int main(int argc , char *argv[])
             return 1;
         }
         fflush(stdout);
-        printf("Connection accepted with client %d\n", client_sock); // client socket
+        printf("[*]Connection accepted with client %d\n", client_sock); // client socket
         printf("Client port: %d\n", client.sin_port); // client port
         char ip_addr[20];
         inet_ntop(AF_INET, &(client.sin_addr.s_addr), ip_addr, c);
@@ -106,20 +84,16 @@ int main(int argc , char *argv[])
         fflush(stdout);
 
         pthread_t t = (trenutniThread == 1) ? t1 : t2;
-        
         pthread_create(&t, NULL, serveClient, (void*) client_sock);
         //pthread_join(t, NULL);  // doesn't work with join
         trenutniThread++;
     }
 
-    
+    // Server prints lottery numbers
+    genJoker(jokerNums);
 
-
-
-
-
-
-    puts("# MAIN DOSAO DO RETURNA #");
+    // End
+    puts("[*]End of main function #");
     getchar();
     getchar();
     close(socket_desc);
@@ -129,7 +103,7 @@ int main(int argc , char *argv[])
 }
 
 
-
+// Function that serves single client on separate thread
 void* serveClient(void* client_sock){
     int clientSocket = (int) client_sock;
     char client_message[DEFAULT_BUFLEN];
@@ -144,7 +118,48 @@ void* serveClient(void* client_sock){
         return 1;
     }
 
-    //Receive a message from client
+    // Server 
+
+    
+}
+
+// Generater Loto and Joker numbers and prints them to console
+void genJoker(int* niz){
+    int loto[7];
+    srand(time(NULL));
+
+    // Loto
+    printf("[*]Loto numbers: ");
+    for(int i=0; i<7; i++){
+        loto[i] = rand()%40;
+        printf("[%d]", loto[i]);
+    }
+    printf("\n");
+
+    // Joker
+    printf("[*]Joker numbers: ");
+    for(int i=0; i<5; i++) {
+        if(loto[i]<10) {
+            niz[i] = loto[i];
+        }
+        else {
+            niz[i] = loto[i]%10;
+        }
+        printf("[%d]", niz[i]);
+    }
+    printf("\n");
+}
+
+
+
+
+
+
+
+
+
+
+//Receive a message from client
     // while( (read_size = recv(clientSocket , client_message , DEFAULT_BUFLEN , 0)) > 0 )
     // {
     //     fflush(stdout);
@@ -161,19 +176,4 @@ void* serveClient(void* client_sock){
     // {
     //     perror("recv failed");
     // }
-}
-
-void genJoker(int* niz){
-    //test
-    // for(int i=0; i<5; i++) {
-    //     niz[i] = i+1;
-    // }
-}
-
-void printJoker(int* niz) {
-    for(int i=0; i<5; i++) {
-        printf("[%d]", niz[i]);
-    }
-    printf("\n");
-}
 
