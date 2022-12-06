@@ -26,7 +26,6 @@ int main(int argc , char *argv[])
     int sock;
     struct sockaddr_in server;
     char message[64] = "";
-    char quit_message[10] = "quit";
     char server_message[DEFAULT_BUFLEN];
     int read_size;
     int numbers[5];
@@ -94,7 +93,17 @@ int main(int argc , char *argv[])
     printNums(numbers);
 
     // Sending numbers to server
-    
+    for(int i=0; i<5; i++){
+        message[i] = numbers[i];
+    }
+    message[5] = '\0';
+
+    if( send(sock , message , strlen(message), 0) < 0)
+    {
+        puts("[!]Send failed");
+        return 1;
+    }
+
 
     // Server informs the client if he won the lottery
 

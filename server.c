@@ -13,6 +13,7 @@
 #include<unistd.h>    //write
 #include<pthread.h>
 #include<time.h>
+#include<stdbool.h>
 
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT   27015
@@ -20,6 +21,13 @@
 
 void* serveClient(void*);
 void genJoker(int*);
+bool checkResult(char*, int*);
+
+
+typedef struct thread_arguments { // struct used to pass multiple arguments to the thread function
+            int client_sock;
+            int* jokerNums;
+} thread_args;
 
 
 int main(int argc , char *argv[])
@@ -83,9 +91,13 @@ int main(int argc , char *argv[])
         printf("Client addr: %s\n", ip_addr); // client ip address
         fflush(stdout);
 
+        // Generating new thread to serve the client
         pthread_t t = (trenutniThread == 1) ? t1 : t2;
-        pthread_create(&t, NULL, serveClient, (void*) client_sock);
-        //pthread_join(t, NULL);  // doesn't work with join
+        thread_args t_args;
+        t_args.client_sock = client_sock;
+        t_args.jokerNums = jokerNums;
+        pthread_create(&t, NULL, serveClient, (void*) &t_args);
+
         trenutniThread++;
     }
 
@@ -104,23 +116,62 @@ int main(int argc , char *argv[])
 
 
 // Function that serves single client on separate thread
-void* serveClient(void* client_sock){
-    int clientSocket = (int) client_sock;
+void* serveClient(void* arguments){
+    thread_args* args = arguments;
+    int client_sock = args->client_sock;
+    int* jokerNums = args->jokerNums;
+
     char client_message[DEFAULT_BUFLEN];
     char message_to_send[DEFAULT_BUFLEN];
     int read_size;
 
     // Server sends "Start game" to the client
     strcpy(message_to_send, "Start game");
-    if( send(clientSocket , message_to_send , strlen(message_to_send), 0) < 0)
+    if( send(client_sock , message_to_send , strlen(message_to_send), 0) < 0)
     {
         puts("Send failed");
         return 1;
     }
 
-    // Server 
+    // Server gets choosen numbers from client and checks if it's a winning combination
+    read_size = recv(client_sock , client_message , DEFAULT_BUFLEN , 0);
+    client_message[read_size] = '\0';
 
+    printf("[*]Client %d combination: ", client_sock);
+    for(int i=0; i<5; i++){
+        printf("[%d]", client_message[i]);
+    }
+
+    bool result = checkResult(client_message, jokerNums);
+    if(result){
+        printf("[*]Client %d won the game!");
+    }
+    else{
+        printf("[*]Client %d didn't win!");
+    }
     
+    // Server sends result to the client
+
+}
+
+// Checks if the player has a winning combination
+bool checkResult(char* clientCombination, int* jokerNums){
+    bool result = true;
+
+    for(int i=0; i<5; i++){
+        bool numberFound = false;
+
+        for(int j=0; j<5; j++){
+            if(clientCombination[i] == jokerNums[j]){
+                numberFound = true;
+            }
+        }
+        if(numberFound == false){
+            result = false;
+        }
+    }
+
+    return result;
 }
 
 // Generater Loto and Joker numbers and prints them to console
