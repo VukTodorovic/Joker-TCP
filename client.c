@@ -106,32 +106,12 @@ int main(int argc , char *argv[])
 
 
     // Server informs the client if he won the lottery
-
+    read_size = recv(sock , server_message , DEFAULT_BUFLEN , 0);
+    server_message[read_size] = '\0';
+    printf("[*]%s\n", server_message);
     
-
-
-
-    // Slanje
-    // scanf("%s", message); // Citamo poruku sa konzole
-    // fflush(stdin);
-
-    // if( send(sock , message , strlen(message), 0) < 0)
-    // {
-    //     puts("Send failed");
-    //     return 1;
-    // }
-    
-
-    // Primanje
-
-    // read_size = recv(sock , server_message , DEFAULT_BUFLEN , 0);
-
-    // fflush(stdout);
-    // server_message[read_size] = '\0';
-    // printf("Server %d: %s\n", sock, server_message);
-        
-
     close(sock);
+    printf("[*]Socket closed\n");
 
     return 0;
 }
