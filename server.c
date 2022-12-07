@@ -6,14 +6,14 @@
     ********************************************************************
 */
 
-#include<stdio.h>
+#include<stdio.h>     //printf
 #include<string.h>    //strlen
-#include<sys/socket.h>
+#include<sys/socket.h>//socket
 #include<arpa/inet.h> //inet_addr
 #include<unistd.h>    //write
-#include<pthread.h>
-#include<time.h>
-#include<stdbool.h>
+#include<pthread.h>   //threads
+#include<time.h>      //for seed
+#include<stdbool.h>   //boolean
 
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT   27015

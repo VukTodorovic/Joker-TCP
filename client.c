@@ -12,6 +12,7 @@
 #include<arpa/inet.h>  //inet_addr
 #include <fcntl.h>     //for open
 #include <unistd.h>    //for close
+#include<time.h>       //for seed
 
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT   27015
@@ -119,8 +120,10 @@ int main(int argc , char *argv[])
 // Generates 5 random numbers 0-9
 void generateRandom(int* niz){
     //test
+    srand(time(NULL));
+
     for(int i=0; i<5; i++){
-        niz[i] = i+1;
+        niz[i] = rand()%10;
     }
 }
 
